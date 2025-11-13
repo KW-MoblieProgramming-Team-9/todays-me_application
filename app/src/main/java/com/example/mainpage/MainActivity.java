@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         summaryTextView.setText(spannable);
     }
 
-    //주어진 텍스트 부분에 굵게(Bold) 스타일을 적용하는 헬퍼 함수
+    //주어진 텍스트 부분에 굵 게(Bold) 스타일을 적용하는 헬퍼 함수
     private void applyBoldStyle(
             SpannableString spannable,
             String targetText,

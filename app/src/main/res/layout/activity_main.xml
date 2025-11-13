@@ -41,7 +41,7 @@
         android:id="@+id/previousRecordsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="과거의 하루를 보러가기"
+        android:text="과거의 하루를 보러가기."
         android:textColor="#3C3C3C"
         android:textSize="16sp"
         android:padding="8dp"
@@ -54,6 +54,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/rounded_background"
+        android:layout_marginBottom="6dp"
         android:orientation="horizontal">
         
         <EditText
@@ -61,13 +63,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+
             android:hint="메시지를 입력하세요"/>
 
         <Button
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#007FFF"
+            android:backgroundTint="#1A73E8"
             android:textColor="#000000"
             android:text="전송"/>
     </LinearLayout>
