@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         previousRecordsButton = findViewById(R.id.previousRecordsButton);
 
         //밑줄 추가
-        previousRecordsButton.setText(Html.fromHtml("<u>과거의 하루를 보러 가기</u>"));
+        previousRecordsButton.setText(Html.fromHtml("<u>과거의 하루를 보러 가기.</u>"));
 
         //전송 버튼 클릭 시
         sendButton.setOnClickListener(v -> {
@@ -96,35 +96,41 @@ public class MainActivity extends AppCompatActivity {
 
         SpannableString spannable = new SpannableString(fullText);
 
-        // 볼드 적용할 변수들
-        applyBoldStyle(spannable, date, fullText);
-        applyBoldStyle(spannable, recordCountStr, fullText);
-        applyBoldStyle(spannable, location, fullText);
-        applyBoldStyle(spannable, recipientName, fullText);
+        // 굵게 + 색상 적용
+        applyBoldAndColor(spannable, date, fullText);
+        applyBoldAndColor(spannable, recordCountStr, fullText);
+        applyBoldAndColor(spannable, location, fullText);
+        applyBoldAndColor(spannable, recipientName, fullText);
 
         summaryTextView.setText(spannable);
     }
 
-    //주어진 텍스트 부분에 굵 게(Bold) 스타일을 적용하는 헬퍼 함수
-    private void applyBoldStyle(
-            SpannableString spannable,
-            String targetText,
-            String fullText) {
 
+    //주어진 텍스트 부분에 검은색 볼드 스타일을 적용하는 헬퍼 함수
+    private void applyBoldAndColor(SpannableString spannable, String targetText, String fullText) {
         int startIndex = fullText.indexOf(targetText);
 
         if (startIndex >= 0) {
             int endIndex = startIndex + targetText.length();
 
-            // 굵게 스타일 (Typeface.BOLD) 적용
+            // 굵게
             spannable.setSpan(
                     new StyleSpan(Typeface.BOLD),
                     startIndex,
                     endIndex,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             );
+
+            // 색상 적용 (검정색)
+            spannable.setSpan(
+                    new android.text.style.ForegroundColorSpan(android.graphics.Color.BLACK),
+                    startIndex,
+                    endIndex,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
         }
     }
+
     //채팅 메시지 추가
     private void addMessage(String sender, String text, int gravity) {
         TextView textView=new TextView(this);

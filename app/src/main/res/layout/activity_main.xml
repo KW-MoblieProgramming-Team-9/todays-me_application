@@ -13,16 +13,37 @@
         android:orientation="vertical"
         android:padding="16dp"
         android:background="#FFFFFF"
-        android:elevation="2dp">
+        android:elevation="0dp">
 
         <TextView
             android:id="@+id/summaryTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="4dp"
+            android:lineSpacingExtra="0dp"
             android:textSize="17sp"
-            android:textColor="#222222" />
+            android:textColor="#333333" />
+
+        <!-- ✅ 고정 말풍선 추가 -->
+        <LinearLayout
+            android:id="@+id/fixedChatBubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="12dp"
+            android:orientation="horizontal"
+            android:background="@drawable/fixed_chat_bubble">
+
+            <TextView
+                android:id="@+id/fixedChatText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="당신의 친구, 챗봇"
+                android:textColor="#000000"
+                android:textSize="16sp" />
+        </LinearLayout>
+
     </LinearLayout>
+
 
     <ScrollView
         android:id="@+id/scrollview"
