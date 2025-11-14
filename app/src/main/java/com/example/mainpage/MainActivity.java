@@ -18,6 +18,8 @@ import android.graphics.Typeface;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.Color;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -133,24 +135,69 @@ public class MainActivity extends AppCompatActivity {
 
     //채팅 메시지 추가
     private void addMessage(String sender, String text, int gravity) {
-        TextView textView=new TextView(this);
-        textView.setText(sender + ": " + text);
-        textView.setPadding(16, 8, 16, 8);
+        TextView textView = new TextView(this);
+        textView.setText(text);
+        textView.setPadding(24, 16, 24, 16); // 말풍선 안 여백
         textView.setTextSize(16);
 
+        // GradientDrawable로 말풍선 배경 만들기
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.RECTANGLE);
+
+        // dp → px 변환
+        float density = getResources().getDisplayMetrics().density;
+        float cornerRadius = 20 * density; // 일반 모서리
+        float tailRadius = 2 * density;    // 꼬리 모서리
+
+        if (sender.equals("챗봇")) {
+            bg.setColor(Color.parseColor("#E0E0E0")); // 배경색
+            bg.setCornerRadii(new float[]{
+                    cornerRadius, cornerRadius,  // top-left
+                    cornerRadius, cornerRadius,  // top-right
+                    cornerRadius, cornerRadius,  // bottom-right
+                    tailRadius, tailRadius       // bottom-left 꼬리
+            });
+            textView.setTextColor(Color.BLACK); // 글자색
+        } else { // 사용자
+            bg.setColor(Color.parseColor("#1A73E8"));
+            bg.setCornerRadii(new float[]{
+                    cornerRadius, cornerRadius,  // top-left
+                    cornerRadius, cornerRadius,  // top-right
+                    tailRadius, tailRadius,      // bottom-right 꼬리
+                    cornerRadius, cornerRadius   // bottom-left
+            });
+            textView.setTextColor(Color.WHITE);
+        }
+
+        textView.setBackground(bg);
+
+        // 레이아웃 파라미터
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
+
         params.gravity = gravity;
         params.topMargin = 10;
 
-        textView.setLayoutParams(params);
-        textView.setBackgroundResource(
-                gravity == Gravity.END ? android.R.color.holo_blue_light : android.R.color.darker_gray);
+        // 화면 모서리와 여백
+        int sideMargin = (int)(16 * density); // 16dp → px
+        if (sender.equals("챗봇")) {
+            params.leftMargin = sideMargin;
+            params.rightMargin = sideMargin / 2;
+        } else { // 사용자
+            params.leftMargin = sideMargin / 2;
+            params.rightMargin = sideMargin;
+        }
 
+        textView.setLayoutParams(params);
+
+        // 채팅 레이아웃에 추가
         chatbot.addView(textView);
 
-        //자동 스크롤 맨 아래로
+        // 자동 스크롤
         scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
     }
+
+
+
 }
