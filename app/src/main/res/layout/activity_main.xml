@@ -6,22 +6,29 @@
     android:gravity="center"
     android:background="#FAFAFA">
 
+
+    <LinearLayout
+        android:id="@+id/chatbot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
     <LinearLayout
         android:id="@+id/infoGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
         android:background="#FFFFFF"
-        android:elevation="0dp">
+        android:elevation="0dp"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/summaryTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:lineSpacingExtra="0dp"
-            android:textSize="17sp"
-            android:textColor="#333333" />
+            android:textColor="#333333"
+            android:textSize="17sp" />
 
         <!-- ✅ 고정 말풍선 추가 -->
         <LinearLayout
@@ -29,9 +36,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:padding="12dp"
+            android:background="@drawable/fixed_chat_bubble"
             android:orientation="horizontal"
-            android:background="@drawable/fixed_chat_bubble">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/fixedChatText"
@@ -44,18 +51,12 @@
 
     </LinearLayout>
 
-
     <ScrollView
         android:id="@+id/scrollview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/chatbot"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
     </ScrollView>
 
     <TextView
@@ -71,7 +72,7 @@
         android:textStyle="bold"
         android:clickable="true"
         android:focusable="true" />
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,7 +81,7 @@
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
         android:orientation="horizontal">
-        
+
         <EditText
             android:id="@+id/inputMessage"
             android:layout_width="0dp"

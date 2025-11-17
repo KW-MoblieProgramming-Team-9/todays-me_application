@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="46px"
+    android:layout_marginLeft="16px"
+    android:layout_marginRight="16px"
+    android:layout_marginBottom="6px"
+    app:cardBackgroundColor="#D9D9D9"
+    app:cardElevation="0dp"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Pill">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingEnd="5px">
+
+        <EditText
+            android:id="@+id/inputMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:layout_marginStart="16px"
+            android:hint="메시지를 입력하세요"/>
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="36px"
+            android:layout_height="36px"
+            android:layout_marginEnd="5px"
+            android:background="@drawable/send_button_background" />
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

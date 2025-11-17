@@ -3,7 +3,6 @@ package com.example.mainpage;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -13,17 +12,12 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.graphics.Typeface;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.Color;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
     LinearLayout chatbot;
@@ -33,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
     TextView summaryTextView;
     TextView previousRecordsButton;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,17 +52,16 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(v -> {
             String message=inputMessage.getText().toString().trim();
             if (!message.isEmpty()){
-                addMessage("나",message, Gravity.END);
+                addMessage("나",message);
                 inputMessage.setText("");
 
                 new Handler().postDelayed(()->{
-                    addMessage("챗봇",message,Gravity.START);
+                    addMessage("챗봇","답장입니다.");
                 },1000);
             }
         });
-
-
     }
+
     private void setupSummaryText() {
         // 현재 날짜 가져오기, 포맷
         Calendar calendar = Calendar.getInstance();
@@ -107,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         summaryTextView.setText(spannable);
     }
 
-
     //주어진 텍스트 부분에 검은색 볼드 스타일을 적용하는 헬퍼 함수
     private void applyBoldAndColor(SpannableString spannable, String targetText, String fullText) {
         int startIndex = fullText.indexOf(targetText);
@@ -134,70 +124,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //채팅 메시지 추가
-    private void addMessage(String sender, String text, int gravity) {
-        TextView textView = new TextView(this);
-        textView.setText(text);
-        textView.setPadding(24, 16, 24, 16); // 말풍선 안 여백
-        textView.setTextSize(16);
-
-        // GradientDrawable로 말풍선 배경 만들기
-        GradientDrawable bg = new GradientDrawable();
-        bg.setShape(GradientDrawable.RECTANGLE);
-
-        // dp → px 변환
-        float density = getResources().getDisplayMetrics().density;
-        float cornerRadius = 20 * density; // 일반 모서리
-        float tailRadius = 2 * density;    // 꼬리 모서리
+    private void addMessage(String sender, String text) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View messageView;
 
         if (sender.equals("챗봇")) {
-            bg.setColor(Color.parseColor("#E0E0E0")); // 배경색
-            bg.setCornerRadii(new float[]{
-                    cornerRadius, cornerRadius,  // top-left
-                    cornerRadius, cornerRadius,  // top-right
-                    cornerRadius, cornerRadius,  // bottom-right
-                    tailRadius, tailRadius       // bottom-left 꼬리
-            });
-            textView.setTextColor(Color.BLACK); // 글자색
+            messageView = inflater.inflate(R.layout.other_message, chatbot, false);
         } else { // 사용자
-            bg.setColor(Color.parseColor("#1A73E8"));
-            bg.setCornerRadii(new float[]{
-                    cornerRadius, cornerRadius,  // top-left
-                    cornerRadius, cornerRadius,  // top-right
-                    tailRadius, tailRadius,      // bottom-right 꼬리
-                    cornerRadius, cornerRadius   // bottom-left
-            });
-            textView.setTextColor(Color.WHITE);
+            messageView = inflater.inflate(R.layout.my_message, chatbot, false);
         }
 
-        textView.setBackground(bg);
-
-        // 레이아웃 파라미터
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        params.gravity = gravity;
-        params.topMargin = 10;
-
-        // 화면 모서리와 여백
-        int sideMargin = (int)(16 * density); // 16dp → px
-        if (sender.equals("챗봇")) {
-            params.leftMargin = sideMargin;
-            params.rightMargin = sideMargin / 2;
-        } else { // 사용자
-            params.leftMargin = sideMargin / 2;
-            params.rightMargin = sideMargin;
-        }
-
-        textView.setLayoutParams(params);
+        TextView messageText = messageView.findViewById(R.id.message_text);
+        messageText.setText(text);
 
         // 채팅 레이아웃에 추가
-        chatbot.addView(textView);
+        chatbot.addView(messageView);
 
         // 자동 스크롤
         scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
     }
-
-
-
 }
