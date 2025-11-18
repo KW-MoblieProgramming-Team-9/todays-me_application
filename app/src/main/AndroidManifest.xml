@@ -15,6 +15,8 @@
         <activity
             android:name=".DiaryListActivity"
             android:exported="false" />
+        <activity android:name=".DiaryContentActivity" android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

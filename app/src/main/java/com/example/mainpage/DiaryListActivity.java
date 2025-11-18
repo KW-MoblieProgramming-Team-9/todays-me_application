@@ -17,11 +17,13 @@ import java.util.Date;
 import java.util.Locale;
 import android.graphics.Paint;
 import android.view.View;
+import android.content.Intent;
 
 
 
 public class DiaryListActivity extends AppCompatActivity {
 
+    private int diaryCount = 123;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +41,6 @@ public class DiaryListActivity extends AppCompatActivity {
 
         // 기록 개수 표시
         TextView tvCount = findViewById(R.id.tv_count);
-        int diaryCount = 123;
         String fullText = "벌써 " + diaryCount + "개의 기록";
 
         tvCount.setText(styleDiaryCount(fullText, diaryCount + "개"));
@@ -71,6 +72,7 @@ public class DiaryListActivity extends AppCompatActivity {
     }
 
     // 일기 아이템 추가
+    // 일기 아이템 추가
     private void addDiary(LinearLayout container, String date, String location, String people) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View item = inflater.inflate(R.layout.diary_item, container, false);
@@ -80,13 +82,29 @@ public class DiaryListActivity extends AppCompatActivity {
         TextView peopleText = item.findViewById(R.id.diary_people);
 
         dateText.setText(date);
-        // 밑줄 추가
         dateText.setPaintFlags(dateText.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
-
         locationText.setText(location);
         peopleText.setText(people);
 
+        // 클릭 이벤트 추가
+        item.setOnClickListener(v -> {
+            Intent intent = new Intent(DiaryListActivity.this, DiaryContentActivity.class);
+
+            // 실제 content 전달
+            String content = location + "에서 " + people + "와(과) 함께";
+
+            intent.putExtra("date", date);
+            intent.putExtra("location", location);
+            intent.putExtra("people", people);
+            intent.putExtra("content", content); // 여기 수정
+            intent.putExtra("diaryCount", diaryCount); // 개수 전달
+
+            startActivity(intent);
+        });
         container.addView(item);
+
     }
+
+
 
 }
