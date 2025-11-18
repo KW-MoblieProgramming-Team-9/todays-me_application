@@ -18,6 +18,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.content.Intent;
+
 
 public class MainActivity extends AppCompatActivity {
     LinearLayout chatbot;
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
         //밑줄 추가
         previousRecordsButton.setText(Html.fromHtml("<u>과거의 하루를 보러 가기.</u>"));
+
+        previousRecordsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, DiaryListActivity.class);
+            startActivity(intent);
+        });
+
 
         //전송 버튼 클릭 시
         sendButton.setOnClickListener(v -> {
