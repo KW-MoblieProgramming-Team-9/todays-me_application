@@ -50,6 +50,13 @@ public class DiaryListActivity extends AppCompatActivity {
         addDiary(diaryContainer, "2025년 10월 23일", "노원구", "홍길동, 김규동");
         addDiary(diaryContainer, "2025년 10월 20일", "강남", "박민수");
         addDiary(diaryContainer, "2025년 10월 18일", "서울대입구", "최지원");
+        addDiary(diaryContainer, "2025년 10월 17일", "서울대입구", "최지원");
+        addDiary(diaryContainer, "2025년 10월 16일", "서울대입구", "최지원");
+        addDiary(diaryContainer, "2025년 10월 15일", "서울대입구", "최지원");
+        addDiary(diaryContainer, "2025년 10월 14일", "서울대입구", "최지원");
+        addDiary(diaryContainer, "2025년 10월 13일", "서울대입구", "최지원");
+
+
     }
 
     // 숫자만 Bold + 검은색, 나머지 회색 처리 헬퍼
