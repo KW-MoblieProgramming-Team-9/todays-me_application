@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="16dp"
         android:textColor="#000000"/>
 
@@ -33,6 +33,8 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="#000000"
+        android:background="@drawable/diary_content_rounded_background"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"/>
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"/>
 </LinearLayout>
