@@ -23,9 +23,12 @@ import java.util.Locale;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.content.Intent;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import com.example.mainpage.location.LocationPermissionHelper;
 import com.example.mainpage.location.LocationWorkScheduler;
+import com.example.mainpage.api.ChatWebSocketClient;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout dateHeaderContainer;
     
     private boolean isChatStarted = false;
+    private View typingIndicator = null;
+    private ChatWebSocketClient webSocketClient;
     private static final int REQUEST_FOREGROUND_LOCATION = 1001;
     private static final int REQUEST_BACKGROUND_LOCATION = 1002;
 
@@ -80,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
         inputMessage.setFocusableInTouchMode(false);
         inputMessage.setCursorVisible(false);
 
+        // WebSocket 클라이언트 초기화
+        initializeWebSocket();
 
         //전송 버튼 클릭 시
         sendButton.setOnClickListener(v -> {
@@ -91,16 +98,71 @@ public class MainActivity extends AppCompatActivity {
                     isChatStarted = true;
                 }
                 
-                addMessage("나",message);
-                inputMessage.setText("");
-
-                new Handler().postDelayed(()->{
-                    addMessage("챗봇","답장입니다.");
-                },1000);
+                // WebSocket 연결 확인
+                if (webSocketClient != null && webSocketClient.isConnected()) {
+                    addMessage("나", message);
+                    inputMessage.setText("");
+                    
+                    // 서버로 메시지 전송
+                    webSocketClient.sendMessage(message);
+                } else {
+                    Toast.makeText(this, "서버와 연결되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         prepareLocationLogging();
+    }
+    
+    // WebSocket 초기화
+    private void initializeWebSocket() {
+        webSocketClient = new ChatWebSocketClient(new ChatWebSocketClient.ChatCallback() {
+            @Override
+            public void onGenerateStarted() {
+                // AI가 응답 생성 시작
+                showTypingIndicator();
+            }
+
+            @Override
+            public void onMessageReceived(String message) {
+                // AI 응답 수신
+                hideTypingIndicator();
+                addMessage("챗봇", message);
+            }
+
+            @Override
+            public void onSessionEnded(String message) {
+                // 세션 종료
+                hideTypingIndicator();
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                // 에러 발생
+                hideTypingIndicator();
+                Toast.makeText(MainActivity.this, "오류: " + error, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onConnected() {
+                // WebSocket 연결됨
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "서버에 연결되었습니다.", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onDisconnected() {
+                // WebSocket 연결 해제됨
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "서버와의 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+        
+        // 연결 시작
+        webSocketClient.connect();
     }
     
     // 채팅 모드로 전환
@@ -209,6 +271,46 @@ public class MainActivity extends AppCompatActivity {
         // 자동 스크롤
         scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
     }
+    
+    // 입력중 표시 추가
+    private void showTypingIndicator() {
+        if (typingIndicator != null) {
+            return; // 이미 표시 중이면 리턴
+        }
+        
+        LayoutInflater inflater = LayoutInflater.from(this);
+        typingIndicator = inflater.inflate(R.layout.typing_message, chatbot, false);
+        
+        // 애니메이션 적용
+        View dot1 = typingIndicator.findViewById(R.id.typing_dot1);
+        View dot2 = typingIndicator.findViewById(R.id.typing_dot2);
+        View dot3 = typingIndicator.findViewById(R.id.typing_dot3);
+        
+        Animation animation1 = AnimationUtils.loadAnimation(this, R.anim.typing_dot_animation);
+        Animation animation2 = AnimationUtils.loadAnimation(this, R.anim.typing_dot_animation);
+        Animation animation3 = AnimationUtils.loadAnimation(this, R.anim.typing_dot_animation);
+        
+        // 각 점마다 시작 시간 지연
+        animation2.setStartOffset(200);
+        animation3.setStartOffset(400);
+        
+        dot1.startAnimation(animation1);
+        dot2.startAnimation(animation2);
+        dot3.startAnimation(animation3);
+        
+        chatbot.addView(typingIndicator);
+        
+        // 자동 스크롤
+        scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
+    }
+    
+    // 입력중 표시 제거
+    private void hideTypingIndicator() {
+        if (typingIndicator != null) {
+            chatbot.removeView(typingIndicator);
+            typingIndicator = null;
+        }
+    }
 
     private void prepareLocationLogging() {
         if (!LocationPermissionHelper.hasForegroundPermission(this)) {
@@ -249,6 +351,15 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "백그라운드 위치 권한이 없어 8시~22시 기록이 제한됩니다.", Toast.LENGTH_LONG).show();
             }
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // WebSocket 연결 해제
+        if (webSocketClient != null) {
+            webSocketClient.disconnect();
         }
     }
 }
