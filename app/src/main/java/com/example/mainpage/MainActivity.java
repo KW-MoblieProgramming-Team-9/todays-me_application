@@ -29,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import com.example.mainpage.location.LocationPermissionHelper;
 import com.example.mainpage.location.LocationWorkScheduler;
 import com.example.mainpage.api.ChatWebSocketClient;
+import com.example.mainpage.util.LocationFormatter;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isChatStarted = false;
     private View typingIndicator = null;
     private ChatWebSocketClient webSocketClient;
+    private LocationFormatter locationFormatter;
+    private boolean isSummaryRequested = false; // 요약 요청 상태
     private static final int REQUEST_FOREGROUND_LOCATION = 1001;
     private static final int REQUEST_BACKGROUND_LOCATION = 1002;
 
@@ -87,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
 
         // WebSocket 클라이언트 초기화
         initializeWebSocket();
+        
+        // LocationFormatter 초기화
+        locationFormatter = new LocationFormatter(this);
 
         //전송 버튼 클릭 시
         sendButton.setOnClickListener(v -> {
@@ -96,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
                 if (!isChatStarted) {
                     startChatMode();
                     isChatStarted = true;
+                    
+                    // 첫 메시지 전송 시 위치 정보를 먼저 전송
+                    sendLocationInfoFirst(message);
+                    return;
                 }
                 
                 // WebSocket 연결 확인
@@ -132,9 +142,27 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSessionEnded(String message) {
-                // 세션 종료
+                // 세션 종료 처리
                 hideTypingIndicator();
-                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+                
+                // 1. 사용자에게 메시지 표시
+                addMessage("챗봇", "그러니까 정리하자면");
+                
+                // 2. 입력중 말풍선 표시
+                showTypingIndicator();
+                
+                // 3. 요약 요청
+                isSummaryRequested = true;
+                webSocketClient.requestSummary();
+            }
+            
+            @Override
+            public void onSummaryCompleted(String summary) {
+                // 요약 완료
+                hideTypingIndicator();
+                
+                // 일기 뷰어 페이지로 이동
+                navigateToDiaryViewer(summary);
             }
 
             @Override
@@ -354,12 +382,94 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
+    /**
+     * 첫 메시지 전송 시 위치 정보를 포함한 시스템 메시지를 먼저 전송합니다.
+     */
+    private void sendLocationInfoFirst(String userMessage) {
+        if (webSocketClient == null || !webSocketClient.isConnected()) {
+            Toast.makeText(this, "서버와 연결되지 않았습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        android.util.Log.d("MainActivity", "첫 메시지 전송 시작 - 위치 정보 포함");
+        
+        // 위치 정보 포맷팅
+        locationFormatter.formatTodayLocations(new LocationFormatter.LocationFormatCallback() {
+            @Override
+            public void onFormatted(String formattedMessage) {
+                android.util.Log.d("MainActivity", "위치 정보 포맷팅 완료. 메시지 길이: " + 
+                        (formattedMessage != null ? formattedMessage.length() : 0));
+                runOnUiThread(() -> {
+                    // 위치 정보가 있으면 먼저 전송
+                    if (formattedMessage != null && !formattedMessage.isEmpty()) {
+                        android.util.Log.d("MainActivity", "위치 정보 메시지 전송");
+                        webSocketClient.sendMessage(formattedMessage);
+                    } else {
+                        android.util.Log.w("MainActivity", "위치 정보 메시지가 비어있습니다.");
+                    }
+                    
+                    // 사용자 메시지 전송
+                    android.util.Log.d("MainActivity", "사용자 메시지 전송: " + userMessage);
+                    addMessage("나", userMessage);
+                    inputMessage.setText("");
+                    webSocketClient.sendMessage(userMessage);
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
+                android.util.Log.e("MainActivity", "위치 정보 포맷팅 오류: " + error);
+                runOnUiThread(() -> {
+                    // 에러가 발생해도 사용자 메시지는 전송
+                    Toast.makeText(MainActivity.this, "위치 정보를 가져오지 못했습니다: " + error, Toast.LENGTH_SHORT).show();
+                    addMessage("나", userMessage);
+                    inputMessage.setText("");
+                    webSocketClient.sendMessage(userMessage);
+                });
+            }
+        });
+    }
+    
+    // 일기 뷰어 페이지로 이동
+    private void navigateToDiaryViewer(String summary) {
+        // 현재 날짜 가져오기
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA);
+        String date = dateFormat.format(calendar.getTime());
+        
+        // 위치 정보는 나중에 LocationFormatter로 가져올 수 있지만, 일단 빈 문자열
+        String location = "";
+        
+        // 사람 정보는 대화에서 추출할 수 있지만, 일단 빈 문자열
+        String people = "";
+        
+        // 요약 내용
+        String content = summary != null ? summary : "";
+        
+        // Intent 생성 및 데이터 전달
+        Intent intent = new Intent(MainActivity.this, DiaryContentActivity.class);
+        intent.putExtra("date", date);
+        intent.putExtra("location", location);
+        intent.putExtra("people", people);
+        intent.putExtra("content", content);
+        intent.putExtra("diaryCount", 0); // 나중에 실제 기록 개수로 업데이트 가능
+        
+        startActivity(intent);
+        
+        // 현재 채팅 화면은 종료하지 않고 백스택에 남김
+        // finish(); // 필요시 주석 해제
+    }
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         // WebSocket 연결 해제
         if (webSocketClient != null) {
             webSocketClient.disconnect();
+        }
+        // LocationFormatter 종료
+        if (locationFormatter != null) {
+            locationFormatter.shutdown();
         }
     }
 }

@@ -18,5 +18,14 @@ public interface LocationLogDao {
 
     @Query("DELETE FROM location_logs WHERE recordedAt < :threshold")
     void deleteOlderThan(long threshold);
+    
+    /**
+     * 특정 날짜의 위치 데이터를 시간순으로 조회합니다.
+     * @param startOfDay 해당 날짜의 시작 시간 (밀리초)
+     * @param endOfDay 해당 날짜의 끝 시간 (밀리초)
+     * @return 해당 날짜의 위치 로그 리스트
+     */
+    @Query("SELECT * FROM location_logs WHERE recordedAt >= :startOfDay AND recordedAt < :endOfDay ORDER BY recordedAt ASC")
+    List<LocationLog> loadByDateRange(long startOfDay, long endOfDay);
 }
 

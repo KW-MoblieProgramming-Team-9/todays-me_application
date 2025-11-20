@@ -29,6 +29,7 @@ public class ChatWebSocketClient {
         void onGenerateStarted();
         void onMessageReceived(String message);
         void onSessionEnded(String message);
+        void onSummaryCompleted(String summary); // 요약 완료 이벤트
         void onError(String error);
         void onConnected();
         void onDisconnected();
@@ -113,6 +114,22 @@ public class ChatWebSocketClient {
         webSocket.send(jsonString);
     }
     
+    public void requestSummary() {
+        if (webSocket == null) {
+            if (callback != null) {
+                callback.onError("WebSocket이 연결되지 않았습니다.");
+            }
+            return;
+        }
+        
+        JsonObject json = new JsonObject();
+        json.addProperty("action", "request_summary");
+        
+        String jsonString = gson.toJson(json);
+        Log.d(TAG, "Requesting summary: " + jsonString);
+        webSocket.send(jsonString);
+    }
+    
     private void handleMessage(String text) {
         try {
             JsonObject json = gson.fromJson(text, JsonObject.class);
@@ -144,6 +161,28 @@ public class ChatWebSocketClient {
                 mainHandler.post(() -> {
                     if (callback != null) {
                         callback.onSessionEnded(message);
+                    }
+                });
+                return;
+            }
+            
+            // 요약 완료
+            if (json.has("status") && "summary_completed".equals(json.get("status").getAsString())) {
+                String summary = json.has("summary") ? json.get("summary").getAsString() : "";
+                mainHandler.post(() -> {
+                    if (callback != null) {
+                        callback.onSummaryCompleted(summary);
+                    }
+                });
+                return;
+            }
+            
+            // 요약 완료 (다른 형식: summary 필드가 직접 있는 경우)
+            if (json.has("summary")) {
+                String summary = json.get("summary").getAsString();
+                mainHandler.post(() -> {
+                    if (callback != null) {
+                        callback.onSummaryCompleted(summary);
                     }
                 });
                 return;
