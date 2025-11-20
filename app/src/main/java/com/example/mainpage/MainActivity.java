@@ -1,6 +1,9 @@
 package com.example.mainpage;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
@@ -8,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -19,6 +23,9 @@ import java.util.Locale;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.content.Intent;
+
+import com.example.mainpage.location.LocationPermissionHelper;
+import com.example.mainpage.location.LocationWorkScheduler;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout dateHeaderContainer;
     
     private boolean isChatStarted = false;
+    private static final int REQUEST_FOREGROUND_LOCATION = 1001;
+    private static final int REQUEST_BACKGROUND_LOCATION = 1002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
                 },1000);
             }
         });
+
+        prepareLocationLogging();
     }
     
     // 채팅 모드로 전환
@@ -197,5 +208,47 @@ public class MainActivity extends AppCompatActivity {
 
         // 자동 스크롤
         scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
+    }
+
+    private void prepareLocationLogging() {
+        if (!LocationPermissionHelper.hasForegroundPermission(this)) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    LocationPermissionHelper.foregroundPermissions(),
+                    REQUEST_FOREGROUND_LOCATION
+            );
+            return;
+        }
+
+        if (LocationPermissionHelper.shouldRequestBackgroundPermission(this)) {
+            LocationPermissionHelper.requestBackgroundPermission(this, REQUEST_BACKGROUND_LOCATION);
+            return;
+        }
+
+        LocationWorkScheduler.scheduleInitialWork(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_FOREGROUND_LOCATION) {
+            if (LocationPermissionHelper.hasForegroundPermission(this)) {
+                if (LocationPermissionHelper.shouldRequestBackgroundPermission(this)) {
+                    LocationPermissionHelper.requestBackgroundPermission(this, REQUEST_BACKGROUND_LOCATION);
+                } else {
+                    LocationWorkScheduler.scheduleInitialWork(this);
+                }
+            } else {
+                Toast.makeText(this, "위치 권한이 없어 위치 기록을 저장할 수 없습니다.", Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQUEST_BACKGROUND_LOCATION) {
+            if (LocationPermissionHelper.hasBackgroundPermission(this)) {
+                LocationWorkScheduler.scheduleInitialWork(this);
+            } else {
+                Toast.makeText(this, "백그라운드 위치 권한이 없어 8시~22시 기록이 제한됩니다.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
