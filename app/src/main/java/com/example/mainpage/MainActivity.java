@@ -29,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
 
     TextView summaryTextView;
     TextView previousRecordsButton;
+    LinearLayout infoGroup;
+    TextView notaLogo;
+    LinearLayout fixedChatBubble;
+    LinearLayout dateHeaderContainer;
+    
+    private boolean isChatStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
         //상단 텍스트뷰 관련
         summaryTextView = findViewById(R.id.summaryTextView);
+        infoGroup = findViewById(R.id.infoGroup);
+        fixedChatBubble = findViewById(R.id.fixedChatBubble);
+        notaLogo = findViewById(R.id.notaLogo);
+        dateHeaderContainer = findViewById(R.id.dateHeaderContainer);
         setupSummaryText();
 
         //이전 기록 관련
@@ -54,12 +64,24 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, DiaryListActivity.class);
             startActivity(intent);
         });
+        
+        // 초기 상태: "안녕!" 텍스트 설정 및 입력 비활성화
+        inputMessage.setText("안녕!");
+        inputMessage.setFocusable(false);
+        inputMessage.setFocusableInTouchMode(false);
+        inputMessage.setCursorVisible(false);
 
 
         //전송 버튼 클릭 시
         sendButton.setOnClickListener(v -> {
             String message=inputMessage.getText().toString().trim();
             if (!message.isEmpty()){
+                // 첫 번째 전송일 때 화면 전환
+                if (!isChatStarted) {
+                    startChatMode();
+                    isChatStarted = true;
+                }
+                
                 addMessage("나",message);
                 inputMessage.setText("");
 
@@ -68,6 +90,39 @@ public class MainActivity extends AppCompatActivity {
                 },1000);
             }
         });
+    }
+    
+    // 채팅 모드로 전환
+    private void startChatMode() {
+        // 첫 화면 요소들 숨기기
+        infoGroup.setVisibility(View.GONE);
+        notaLogo.setVisibility(View.GONE);
+        previousRecordsButton.setVisibility(View.GONE);
+        
+        // 날짜 헤더 추가
+        addDateHeader();
+        
+        // 입력란 활성화 및 힌트 변경
+        inputMessage.setFocusable(true);
+        inputMessage.setFocusableInTouchMode(true);
+        inputMessage.setCursorVisible(true);
+        inputMessage.setHint("메시지를 입력하세요");
+    }
+    
+    // 날짜 헤더 추가
+    private void addDateHeader() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd - E요일의 기록.", Locale.KOREA);
+        String dateStr = dateFormat.format(calendar.getTime());
+        
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View headerView = inflater.inflate(R.layout.chat_date_header, dateHeaderContainer, false);
+        
+        TextView dateText = headerView.findViewById(R.id.date_header_text);
+        dateText.setText(dateStr);
+        
+        dateHeaderContainer.addView(headerView);
+        dateHeaderContainer.setVisibility(View.VISIBLE);
     }
 
     private void setupSummaryText() {
@@ -79,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         // 임시 변수
         int recordCount = 123;
         String location = "노원구";
-        String recipientName = "챗봇";
+        String recipientName = "000";
 
         updateSummaryText(todayDate, recordCount, location, recipientName);
     }
@@ -106,22 +161,14 @@ public class MainActivity extends AppCompatActivity {
         summaryTextView.setText(spannable);
     }
 
-    //주어진 텍스트 부분에 검은색 볼드 스타일을 적용하는 헬퍼 함수
+    //주어진 텍스트 부분에 검은색 스타일을 적용하는 헬퍼 함수
     private void applyBoldAndColor(SpannableString spannable, String targetText, String fullText) {
         int startIndex = fullText.indexOf(targetText);
 
         if (startIndex >= 0) {
             int endIndex = startIndex + targetText.length();
 
-            // 굵게
-            spannable.setSpan(
-                    new StyleSpan(Typeface.BOLD),
-                    startIndex,
-                    endIndex,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-
-            // 색상 적용 (검정색)
+            // 색상 적용 (검정색 #000000)
             spannable.setSpan(
                     new android.text.style.ForegroundColorSpan(android.graphics.Color.BLACK),
                     startIndex,
