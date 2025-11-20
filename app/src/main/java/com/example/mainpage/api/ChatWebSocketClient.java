@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ChatWebSocketClient {
     private static final String TAG = "ChatWebSocketClient";
-    private static final String WS_URL = "ws://localhost:3000/"; // 에뮬레이터용 localhost
+    private static final String WS_URL = "ws://10.0.2.2:3000/"; // 에뮬레이터용 localhost
     
     private WebSocket webSocket;
     private OkHttpClient client;
