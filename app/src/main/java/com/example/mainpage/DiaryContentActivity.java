@@ -1,9 +1,11 @@
+//DiaryContentActivity.java
 package com.example.mainpage;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.content.Intent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,7 +19,13 @@ public class DiaryContentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_diary_content);
 
         ImageButton backBtn = findViewById(R.id.btn_back_main);
-        backBtn.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(DiaryContentActivity.this, DiaryListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        });
+
 
         // 날짜, 내용 등 받기
         String date = getIntent().getStringExtra("date");

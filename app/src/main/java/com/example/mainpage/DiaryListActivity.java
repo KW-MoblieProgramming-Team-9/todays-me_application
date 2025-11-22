@@ -1,3 +1,4 @@
+//DiaryListActivity.java
 package com.example.mainpage;
 
 import androidx.appcompat.app.AppCompatActivity;

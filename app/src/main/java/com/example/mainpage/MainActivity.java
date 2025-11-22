@@ -1,3 +1,4 @@
+//MainActivity.java
 package com.example.mainpage;
 
 import androidx.annotation.NonNull;
@@ -445,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
         
         // 요약 내용
         String content = summary != null ? summary : "";
+
         
         // Intent 생성 및 데이터 전달
         Intent intent = new Intent(MainActivity.this, DiaryContentActivity.class);
