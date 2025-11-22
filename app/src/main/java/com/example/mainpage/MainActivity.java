@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         summaryTextView.setText(spannable);
     }
 
-    //주어진 텍스트 부분에 검은색 스타일을 적용하는 헬퍼 함수
+    //주어진 텍스트 부분에 검은색 스타일과 bold를 적용하는 헬퍼 함수
     private void applyBoldAndColor(SpannableString spannable, String targetText, String fullText) {
         int startIndex = fullText.indexOf(targetText);
 
@@ -273,6 +273,14 @@ public class MainActivity extends AppCompatActivity {
             // 색상 적용 (검정색 #000000)
             spannable.setSpan(
                     new android.text.style.ForegroundColorSpan(android.graphics.Color.BLACK),
+                    startIndex,
+                    endIndex,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            
+            // Bold 스타일 적용
+            spannable.setSpan(
+                    new StyleSpan(Typeface.BOLD),
                     startIndex,
                     endIndex,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
