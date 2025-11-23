@@ -29,8 +29,11 @@ import android.view.animation.AnimationUtils;
 
 import com.example.mainpage.location.LocationPermissionHelper;
 import com.example.mainpage.location.LocationWorkScheduler;
+import com.example.mainpage.location.LocationDatabase;
 import com.example.mainpage.api.ChatWebSocketClient;
 import com.example.mainpage.util.LocationFormatter;
+import com.example.mainpage.diary.Diary;
+import com.example.mainpage.diary.DiaryDao;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -402,6 +405,14 @@ public class MainActivity extends AppCompatActivity {
         
         android.util.Log.d("MainActivity", "첫 메시지 전송 시작 - 위치 정보 포함");
         
+        // 현재 날짜 가져오기
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA);
+        String currentDate = dateFormat.format(calendar.getTime());
+        
+        // 첫 메시지에 날짜 추가
+        String messageWithDate = currentDate + " " + userMessage;
+        
         // 위치 정보 포맷팅
         locationFormatter.formatTodayLocations(new LocationFormatter.LocationFormatCallback() {
             @Override
@@ -417,11 +428,11 @@ public class MainActivity extends AppCompatActivity {
                         android.util.Log.w("MainActivity", "위치 정보 메시지가 비어있습니다.");
                     }
                     
-                    // 사용자 메시지 전송
-                    android.util.Log.d("MainActivity", "사용자 메시지 전송: " + userMessage);
+                    // 사용자 메시지 전송 (날짜 포함)
+                    android.util.Log.d("MainActivity", "사용자 메시지 전송: " + messageWithDate);
                     addMessage("나", userMessage);
                     inputMessage.setText("");
-                    webSocketClient.sendMessage(userMessage);
+                    webSocketClient.sendMessage(messageWithDate);
                 });
             }
             
@@ -429,11 +440,11 @@ public class MainActivity extends AppCompatActivity {
             public void onError(String error) {
                 android.util.Log.e("MainActivity", "위치 정보 포맷팅 오류: " + error);
                 runOnUiThread(() -> {
-                    // 에러가 발생해도 사용자 메시지는 전송
+                    // 에러가 발생해도 사용자 메시지는 전송 (날짜 포함)
                     Toast.makeText(MainActivity.this, "위치 정보를 가져오지 못했습니다: " + error, Toast.LENGTH_SHORT).show();
                     addMessage("나", userMessage);
                     inputMessage.setText("");
-                    webSocketClient.sendMessage(userMessage);
+                    webSocketClient.sendMessage(messageWithDate);
                 });
             }
         });

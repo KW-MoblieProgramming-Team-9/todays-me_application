@@ -15,6 +15,9 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 import java.util.concurrent.TimeUnit;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class ChatWebSocketClient {
     private static final String TAG = "ChatWebSocketClient";
