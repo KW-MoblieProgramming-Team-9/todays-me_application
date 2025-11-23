@@ -38,7 +38,7 @@
                 android:id="@+id/fixedChatText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="당신의 친구, 000"
+                android:text="오늘의 나."
                 android:textColor="#000000"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -67,20 +67,6 @@
             android:orientation="vertical" />
 
     </ScrollView>
-
-    <TextView
-        android:id="@+id/notaLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="nǒta"
-        android:textColor="#000000"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="120dp"
-        android:layout_gravity="start" />
 
     <TextView
         android:id="@+id/previousRecordsButton"

@@ -4,7 +4,6 @@ package com.example.mainpage;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.text.SpannableStringBuilder;
@@ -15,49 +14,60 @@ import android.graphics.Typeface;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import android.graphics.Paint;
 import android.view.View;
 import android.content.Intent;
+
+import com.example.mainpage.location.LocationDatabase;
 
 
 
 public class DiaryListActivity extends AppCompatActivity {
 
-    private int diaryCount = 123;
+    private DiaryDao diaryDao;
+    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_list);
 
-        // 뒤로가기 버튼
-        ImageButton backBtn = findViewById(R.id.btn_back_main);
-        backBtn.setOnClickListener(v -> finish());
+        // DB 초기화
+        diaryDao = LocationDatabase.getInstance(this).diaryDao();
 
         // 날짜 표시
         TextView tvDate = findViewById(R.id.tv_date);
         String today = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(new Date());
         tvDate.setText(today);
 
+        // DB에서 일기 목록 가져오기 (백그라운드 스레드에서)
+        databaseExecutor.execute(() -> {
+            List<Diary> diaries = diaryDao.getAll();
+            int diaryCount = diaries.size();
 
-        // 기록 개수 표시
-        TextView tvCount = findViewById(R.id.tv_count);
-        String fullText = "벌써 " + diaryCount + "개의 기록";
+            runOnUiThread(() -> {
+                // 기록 개수 표시
+                TextView tvCount = findViewById(R.id.tv_count);
+                String fullText = "벌써 " + diaryCount + "개의 기록";
+                tvCount.setText(styleDiaryCount(fullText, diaryCount + "개"));
 
-        tvCount.setText(styleDiaryCount(fullText, diaryCount + "개"));
-
-        // 일기 리스트 동적 추가
-        LinearLayout diaryContainer = findViewById(R.id.diaryContainer);
-        addDiary(diaryContainer, "2025년 10월 23일", "노원구", "홍길동, 김규동");
-        addDiary(diaryContainer, "2025년 10월 20일", "강남", "박민수");
-        addDiary(diaryContainer, "2025년 10월 18일", "서울대입구", "최지원");
-        addDiary(diaryContainer, "2025년 10월 17일", "서울대입구", "최지원");
-        addDiary(diaryContainer, "2025년 10월 16일", "서울대입구", "최지원");
-        addDiary(diaryContainer, "2025년 10월 15일", "서울대입구", "최지원");
-        addDiary(diaryContainer, "2025년 10월 14일", "서울대입구", "최지원");
-        addDiary(diaryContainer, "2025년 10월 13일", "서울대입구", "최지원");
-
-
+                // 일기 리스트 동적 추가
+                LinearLayout diaryContainer = findViewById(R.id.diaryContainer);
+                for (Diary diary : diaries) {
+                    addDiary(diaryContainer, diary);
+                }
+            });
+        });
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        databaseExecutor.shutdown();
     }
 
     // 숫자만 Bold + 검은색, 나머지 회색 처리 헬퍼
@@ -80,37 +90,35 @@ public class DiaryListActivity extends AppCompatActivity {
     }
 
     // 일기 아이템 추가
-    // 일기 아이템 추가
-    private void addDiary(LinearLayout container, String date, String location, String people) {
+    private void addDiary(LinearLayout container, Diary diary) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View item = inflater.inflate(R.layout.diary_item, container, false);
 
         TextView dateText = item.findViewById(R.id.diary_date);
         TextView locationText = item.findViewById(R.id.diary_location);
-        TextView peopleText = item.findViewById(R.id.diary_people);
 
-        dateText.setText(date);
+        dateText.setText(diary.date);
         dateText.setPaintFlags(dateText.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
-        locationText.setText(location);
-        peopleText.setText(people);
+        locationText.setText(diary.location);
 
         // 클릭 이벤트 추가
         item.setOnClickListener(v -> {
             Intent intent = new Intent(DiaryListActivity.this, DiaryContentActivity.class);
-
-            // 실제 content 전달
-            String content = location + "에서 " + people + "와(과) 함께";
-
-            intent.putExtra("date", date);
-            intent.putExtra("location", location);
-            intent.putExtra("people", people);
-            intent.putExtra("content", content); // 여기 수정
-            intent.putExtra("diaryCount", diaryCount); // 개수 전달
-
-            startActivity(intent);
+            intent.putExtra("diaryId", diary.id);
+            intent.putExtra("date", diary.date);
+            intent.putExtra("location", diary.location);
+            intent.putExtra("content", diary.content);
+            
+            // 기록 개수는 백그라운드에서 가져오기
+            databaseExecutor.execute(() -> {
+                int diaryCount = diaryDao.getCount();
+                intent.putExtra("diaryCount", diaryCount);
+                runOnUiThread(() -> {
+                    startActivity(intent);
+                });
+            });
         });
         container.addView(item);
-
     }
 
 

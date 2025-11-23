@@ -89,8 +89,8 @@ public class LocationFormatter {
                     );
                     
                     if (districtName == null || districtName.isEmpty()) {
-                        districtName = "위치 정보 없음";
-                        Log.w(TAG, "행정동 정보를 가져오지 못했습니다. 좌표: " + group.longitude + ", " + group.latitude);
+                        districtName = "노원구 월계동";
+                        Log.w(TAG, "행정동 정보를 가져오지 못했습니다. fallback으로 노원구 월계동 사용. 좌표: " + group.longitude + ", " + group.latitude);
                     } else {
                         Log.d(TAG, "행정동 정보: " + districtName);
                     }
@@ -190,6 +190,14 @@ public class LocationFormatter {
             this.latitude = latitude;
             this.longitude = longitude;
         }
+    }
+    
+    /**
+     * 특정 좌표의 행정동 이름을 가져옵니다.
+     * 동기적으로 실행되므로 백그라운드 스레드에서 호출해야 합니다.
+     */
+    public String getDistrictName(double longitude, double latitude) {
+        return apiClient.getDistrictName(longitude, latitude);
     }
     
     public void shutdown() {

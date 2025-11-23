@@ -6,7 +6,9 @@
         <item name="imageButtonStyle">@style/Widget.AppCompat.ImageButton</item>
     </style>
 
-    <style name="Theme.MainPage" parent="Base.Theme.MainPage" />
+    <style name="Theme.MainPage" parent="Base.Theme.MainPage">
+        <item name="android:fontFamily">@font/paperlogy</item>
+    </style>
 
     <style name="ShapeAppearance.Pill" parent="">
         <item name="cornerFamily">rounded</item>

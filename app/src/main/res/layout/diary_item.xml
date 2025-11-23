@@ -25,12 +25,4 @@
         android:layout_marginTop="2dp"
         android:gravity="end" />
 
-    <TextView
-        android:id="@+id/diary_people"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:textColor="#555555"
-        android:gravity="end" />
-
 </LinearLayout>

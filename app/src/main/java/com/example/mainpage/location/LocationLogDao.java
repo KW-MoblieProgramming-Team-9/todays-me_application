@@ -27,5 +27,8 @@ public interface LocationLogDao {
      */
     @Query("SELECT * FROM location_logs WHERE recordedAt >= :startOfDay AND recordedAt < :endOfDay ORDER BY recordedAt ASC")
     List<LocationLog> loadByDateRange(long startOfDay, long endOfDay);
+    
+    @Query("DELETE FROM location_logs")
+    void deleteAll();
 }
 

@@ -36,7 +36,7 @@ public class DistrictNameApiClient {
      * 
      * @param longitude 경도 (X 좌표)
      * @param latitude 위도 (Y 좌표)
-     * @return 행정동 이름 (예: "서울 강남구 대치동"), 실패 시 null
+     * @return 행정동 이름 (예: "강남구 대치동"), 실패 시 null
      */
     public String getDistrictName(double longitude, double latitude) {
         String url = BASE_URL + API_ENDPOINT + 
@@ -81,9 +81,27 @@ public class DistrictNameApiClient {
             if (document.has("region_type") && 
                 "H".equals(document.get("region_type").getAsString())) {
                 
-                // address_name 반환
-                if (document.has("address_name")) {
-                    return document.get("address_name").getAsString();
+                // region_2depth_name(구)과 region_3depth_name(동) 조합
+                String region2Depth = null;
+                String region3Depth = null;
+                
+                if (document.has("region_2depth_name")) {
+                    region2Depth = document.get("region_2depth_name").getAsString();
+                }
+                
+                if (document.has("region_3depth_name")) {
+                    region3Depth = document.get("region_3depth_name").getAsString();
+                }
+                
+                // 둘 다 있으면 조합해서 반환
+                if (region2Depth != null && !region2Depth.isEmpty() && 
+                    region3Depth != null && !region3Depth.isEmpty()) {
+                    return region2Depth + " " + region3Depth;
+                }
+                
+                // region_2depth_name만 있으면 그것만 반환
+                if (region2Depth != null && !region2Depth.isEmpty()) {
+                    return region2Depth;
                 }
             }
             
